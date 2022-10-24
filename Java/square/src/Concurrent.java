@@ -23,12 +23,14 @@ class RunnableDemo implements Runnable {
     }
 
     public void run() {
+        int temp = 0;
         for (int i = start; i <= end; i++) {
             squared_arr[i] = arr[i] * arr[i];
-            lock.lock();
-            result[0] += squared_arr[i];
-            lock.unlock();
+            temp += squared_arr[i];
         }
+        lock.lock();
+        result[0] += temp;
+        lock.unlock();
     }
 
     public void start () {
@@ -43,7 +45,7 @@ class RunnableDemo implements Runnable {
 public class Concurrent {
 
     public static void main(String args[]) {
-        final int NUM_ARRAY = 100000000;
+        final int NUM_ARRAY = 1000000000;
         int[] arr = new int[NUM_ARRAY];
         int[] squared_arr = new int[NUM_ARRAY];
         int[] result = new int[]{0};
@@ -55,11 +57,12 @@ public class Concurrent {
             arr[i] = ran.nextInt(1, 4);
         }
 
-        long startTime = System.currentTimeMillis();
         RunnableDemo R1 = new RunnableDemo( "Thread-1", 0, NUM_ARRAY/2, arr, squared_arr, result, lock);
+        RunnableDemo R2 = new RunnableDemo( "Thread-2", NUM_ARRAY/2+1, NUM_ARRAY-1, arr, squared_arr, result, lock);
+
+        long startTime = System.currentTimeMillis();
         R1.start();
 
-        RunnableDemo R2 = new RunnableDemo( "Thread-2", NUM_ARRAY/2+1, NUM_ARRAY-1, arr, squared_arr, result, lock);
         R2.start();
 
         // join threads
